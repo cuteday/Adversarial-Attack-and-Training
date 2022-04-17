@@ -15,8 +15,6 @@ from torch.utils.data import DataLoader
 import random
     
     
-    
-    
 def gettensor(x, y, device):
     
     return x.to(device), y.to(device)
@@ -54,8 +52,8 @@ def generate_data_for_black_box_attack(classifier, dataset, device, max_num=1000
             
         for i in range(x.shape[0]):
             if res[i].item():
-                image.append(x[i].numpy())
-                label.append(y[i].numpy())
+                image.append(x[i].cpu().numpy())
+                label.append(y[i].cpu().numpy())
             if len(image) >= max_num:
                 return image, label
             
@@ -67,7 +65,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', type=str, default='-1')
-    parser.add_argument('--save_path', type=str, default='../model/cnn.ckpt')
+    parser.add_argument('--save_path', type=str, default='../model/adv_cnn.pt')
     parser.add_argument('--dataset_dir', type=str, default='../data')
     parser.add_argument('--eval_batch_size', type=int, default=1000)
     parser.add_argument('--rand_seed', type=int, default=42)
@@ -90,7 +88,7 @@ if __name__ == "__main__":
     test_dataloader = DataLoader(test, batch_size=opt.eval_batch_size)
 
     
-    classifier = CNN()
+    classifier = CNN().to(device)
     classifier.load_state_dict(torch.load(opt.save_path))
     
     acc = evaluate(classifier, test_dataloader, device)
